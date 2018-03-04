@@ -4,7 +4,7 @@ Experimental: improving Mobx with async capabilities
 ## Usage
 ```js
 import { observable } from 'mobx'
-import { asyncComputed, asyncAction, dependesOn } from 'mobx-async'
+import { asyncComputed, asyncAction, dependsOn } from 'mobx-async'
 
 export default class TodoStore {
   @observable order = 'name'
