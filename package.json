@@ -1,0 +1,17 @@
+{
+  "name": "mobx-async",
+  "version": "0.0.1",
+  "description": "Experimental: improving Mobx with async capabilities",
+  "main": "dist/index.js",
+  "scripts": {},
+  "author": "Wellington Guimaraes<wellguimaraes@gmail.com>",
+  "license": "MIT",
+  "peerDependencies": {
+    "mobx": "^3.6.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-stage-0": "^6.24.1"
+  }
+}
