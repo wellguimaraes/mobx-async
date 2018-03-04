@@ -1,4 +1,7 @@
 import { action, computed, extendObservable, observable } from 'mobx'
+import _Async from './Async'
+
+export const Async = _Async
 
 export function dependsOn(anything) { }
 
