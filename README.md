@@ -56,6 +56,7 @@ class TodoList extends React.Component {
         >
           Reload items
         </button>
+        
         <Async value={ store.items }>
           { (items) => {
             
