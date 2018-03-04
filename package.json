@@ -3,7 +3,10 @@
   "version": "0.0.1",
   "description": "Experimental: improving Mobx with async capabilities",
   "main": "dist/index.js",
-  "scripts": {},
+  "scripts": {
+    "prepublish": "npm run build",
+    "build": "babel -d dist ./src"
+  },
   "author": "Wellington Guimaraes<wellguimaraes@gmail.com>",
   "license": "MIT",
   "peerDependencies": {
@@ -13,5 +16,11 @@
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-stage-0": "^6.24.1"
+  },
+  "babel": {
+    "presets": [
+      "env",
+      "stage-0"
+    ]
   }
 }
