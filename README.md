@@ -25,7 +25,9 @@ export default class TodoStore {
   }
 
   @asyncComputed async anotherComputedField() {
-    dependsOn(this.someComputedField, this.anotherObservable)
+    dependsOn(
+      this.someComputedField, 
+      this.anotherObservable)
 
     // ...
   }
