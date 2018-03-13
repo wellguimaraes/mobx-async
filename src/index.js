@@ -1,52 +1,57 @@
-import { action, computed, extendObservable, observable } from 'mobx'
+import { action, observable } from 'mobx'
 import _Async from './Async'
 
 export const Async = _Async
 
 export function dependsOn(anything) { }
 
-export function asyncComputed(target, key, descriptor) {
-  extendObservable(target, {
-    [ key ]: computed(descriptor.value)
-  })
-
-  return Object.getOwnPropertyDescriptor(target, key)
-}
-
 export function asyncAction(target, key, descriptor) {
   const original = descriptor.value
 
   const fnState = observable({
     pending: false,
-    error  : undefined
+    error  : undefined,
+    result : undefined,
+    args   : undefined
   })
 
-  const fn = function () {
+  const actionWrapper = action(function () {
     fnState.pending = true
+    fnState.args    = arguments
 
     Promise
       .resolve(original.apply(this, arguments))
       .then(
-        () => {
+        (result) => {
           fnState.pending = false
           fnState.error   = undefined
+          fnState.result  = result
         },
         (err) => {
+          fnState.result  = undefined
           fnState.pending = false
           fnState.error   = err
         }
       )
-  }
+  })
 
-  extendObservable(target, { [ key ]: action(fn) })
+  descriptor.value = actionWrapper
 
-  Object.defineProperty(target[ key ], 'pending', {
+  Object.defineProperty(actionWrapper, 'pending', {
     get: () => fnState.pending
   })
 
-  Object.defineProperty(target[ key ], 'error', {
+  Object.defineProperty(actionWrapper, 'error', {
     get: () => fnState.error
   })
 
-  return Object.getOwnPropertyDescriptor(target, key)
+  Object.defineProperty(actionWrapper, 'result', {
+    get: () => fnState.result
+  })
+
+  Object.defineProperty(actionWrapper, 'args', {
+    get: () => fnState.args
+  })
+
+  return descriptor
 }
