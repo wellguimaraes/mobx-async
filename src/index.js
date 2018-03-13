@@ -17,6 +17,7 @@ export function asyncAction(target, key, descriptor) {
 
   const actionWrapper = action(function () {
     fnState.pending = true
+    fnState.error   = undefined
     fnState.args    = arguments
 
     Promise
