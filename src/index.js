@@ -12,13 +12,12 @@ export function asyncAction(target, key, descriptor) {
     pending: false,
     error  : undefined,
     result : undefined,
-    args   : undefined
   })
 
   const actionWrapper = action(function () {
     fnState.pending = true
     fnState.error   = undefined
-    fnState.args    = arguments
+    fnState.result  = undefined
 
     Promise
       .resolve(original.apply(this, arguments))
@@ -26,7 +25,7 @@ export function asyncAction(target, key, descriptor) {
         (result) => {
           fnState.pending = false
           fnState.error   = undefined
-          fnState.result  = result
+          fnState.result  = result || true
         },
         (err) => {
           fnState.result  = undefined
@@ -48,10 +47,6 @@ export function asyncAction(target, key, descriptor) {
 
   Object.defineProperty(actionWrapper, 'result', {
     get: () => fnState.result
-  })
-
-  Object.defineProperty(actionWrapper, 'args', {
-    get: () => fnState.args
   })
 
   return descriptor
