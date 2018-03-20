@@ -9,28 +9,31 @@ export function asyncAction(target, key, descriptor) {
   const original = descriptor.value
 
   const fnState = observable({
-    pending: false,
-    error  : undefined,
-    result : undefined,
+    pending : false,
+    success : false,
+    error   : undefined,
+    response: undefined
   })
 
   const actionWrapper = action(function () {
-    fnState.pending = true
-    fnState.error   = undefined
-    fnState.result  = undefined
+    fnState.pending  = true
+    fnState.success  = false
+    fnState.error    = undefined
+    fnState.response = undefined
 
-    Promise
+    return Promise
       .resolve(original.apply(this, arguments))
       .then(
-        (result) => {
-          fnState.pending = false
-          fnState.error   = undefined
-          fnState.result  = result || true
+        (response) => {
+          fnState.pending  = false
+          fnState.success  = true
+          fnState.error    = undefined
+          fnState.response = response
         },
         (err) => {
-          fnState.result  = undefined
-          fnState.pending = false
-          fnState.error   = err
+          fnState.response = undefined
+          fnState.pending  = false
+          fnState.error    = err
         }
       )
   })
@@ -45,9 +48,20 @@ export function asyncAction(target, key, descriptor) {
     get: () => fnState.error
   })
 
-  Object.defineProperty(actionWrapper, 'result', {
-    get: () => fnState.result
+  Object.defineProperty(actionWrapper, 'response', {
+    get: () => fnState.response
   })
+
+  Object.defineProperty(actionWrapper, 'success', {
+    get: () => fnState.success
+  })
+
+  actionWrapper.reset = () => {
+    fnState.pending  = false
+    fnState.success  = false
+    fnState.error    = undefined
+    fnState.response = undefined
+  }
 
   return descriptor
 }
