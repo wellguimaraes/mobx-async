@@ -1,6 +1,6 @@
 {
   "name": "mobx-async",
-  "version": "0.0.13",
+  "version": "0.0.19",
   "description": "Experimental: improving Mobx with async capabilities",
   "main": "dist/index.js",
   "scripts": {
@@ -11,15 +11,15 @@
   "license": "MIT",
   "peerDependencies": {
     "mobx": "^3.6.1",
-    "react": "^16.2.0",
-    "prop-types": "^15.6.1"
+    "prop-types": "^15.6.1",
+    "react": "^16.2.0"
   },
   "devDependencies": {
-    "react": "^16.2.0",
-    "prop-types": "^15.6.1",
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.6.1",
-    "babel-preset-stage-0": "^6.24.1"
+    "babel-preset-stage-0": "^6.24.1",
+    "prop-types": "^15.6.1",
+    "react": "^16.2.0"
   },
   "babel": {
     "presets": [
