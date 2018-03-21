@@ -1,6 +1,6 @@
 {
   "name": "mobx-async",
-  "version": "0.0.29",
+  "version": "0.0.30",
   "description": "Experimental: improving Mobx with async capabilities",
   "main": "dist/index.js",
   "scripts": {
@@ -18,7 +18,7 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.6.1",
-    "babel-preset-react-app": "^3.1.1",
+    "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "cross-env": "^5.1.4",
     "mobx": "^4.0.0",
@@ -28,11 +28,9 @@
   },
   "babel": {
     "presets": [
-      "react-app",
+      "react",
       "stage-0"
     ]
   },
-  "dependencies": {
-    "babel-preset-react-app": "^3.1.1"
-  }
+  "dependencies": {}
 }
