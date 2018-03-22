@@ -1,6 +1,6 @@
 {
   "name": "mobx-async",
-  "version": "0.0.42",
+  "version": "0.0.43",
   "description": "Experimental: improving Mobx with async capabilities",
   "main": "dist/index.js",
   "scripts": {
@@ -30,7 +30,7 @@
       "transform-decorators-legacy"
     ],
     "presets": [
-      "react",
+      "env",
       "stage-0"
     ]
   }
