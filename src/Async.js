@@ -14,9 +14,10 @@ export default class Async extends React.Component {
 
     this.state = values
       .map(() => ({
-        pending: true,
-        error  : undefined,
-        value  : undefined
+        pending      : true,
+        error        : undefined,
+        value        : undefined,
+        previousValue: undefined
       }))
       .reduce((acc, curr, index) => {
         acc[ index ] = curr
@@ -31,6 +32,10 @@ export default class Async extends React.Component {
     const currValues = toArray(this.props.value || this.props.values)
 
     currValues.forEach((it, i) => this.handlePromise(it, i))
+  }
+
+  componentWillUnmount() {
+    this.unmounted = true
   }
 
   componentWillReceiveProps(nextProps) {
@@ -56,24 +61,30 @@ export default class Async extends React.Component {
       Promise
         .resolve(promise)
         .then((value) => {
+          if (this.unmounted) return
+
           const currPromise = this.state[ index ]._promise
 
           if (!currPromise || currPromise === promise)
             this.setState({
               [ index ]: {
                 value,
-                pending: false,
-                error  : undefined
+                previousValue: this.state[ index ].value,
+                pending      : false,
+                error        : undefined
               }
             })
         }, (error) => {
+          if (this.unmounted) return
+
           const currPromise = this.state[ index ]._promise
 
           if (!currPromise || currPromise === promise)
             this.setState({
               [ index ]: {
-                value  : undefined,
-                pending: false,
+                value        : undefined,
+                previousValue: this.state[ index ].value,
+                pending      : false,
                 error
               }
             })
@@ -82,7 +93,9 @@ export default class Async extends React.Component {
   }
 
   get results() {
-    return this.props.values.map((ignore, i) => this.state[ i ])
+    const values = toArray(this.props.value || this.props.values)
+
+    return values.map((ignore, i) => this.state[ i ])
   }
 
   render() {
