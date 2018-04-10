@@ -56,7 +56,7 @@ export function dependsOn(...anything) { }
 
 export function asyncComputed() {
   if (arguments.length === 1 && typeof arguments[ 0 ] === 'object')
-    return asyncComputedDecorator.bind(arguments[ 0 ])
+    return asyncComputedDecorator.bind(null, arguments[ 0 ])
   else
     return asyncComputedDecorator({}, arguments[ 0 ], arguments[ 1 ], arguments[ 2 ])
 }
