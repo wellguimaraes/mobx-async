@@ -4,13 +4,11 @@ function asyncComputedDecorator({ initialValue }, target, key, descriptor) {
   const originalGetter = descriptor.get
 
   const obsValue   = observable.box(initialValue)
-  const obsPromise = observable.box(null)
   const obsPending = observable.box(false)
   const obsError   = observable.box(undefined)
 
   const pendingKey = key + 'Pending'
   const errorKey   = key + 'Error'
-  const promiseKey = key + 'Promise'
 
   // noinspection JSUnresolvedFunction
   Object.defineProperty(target, pendingKey, computed(target, pendingKey, {
@@ -26,26 +24,11 @@ function asyncComputedDecorator({ initialValue }, target, key, descriptor) {
     }
   }))
 
-  // noinspection JSUnresolvedFunction
-  Object.defineProperty(target, promiseKey, computed(target, errorKey, {
-    get() {
-      return obsPromise.get()
-        ? obsPromise.get()
-        : new Promise(async (resolve) => {
-          dependsOn(this[ key ])
-          await when(() => obsPromise.get())
-          resolve(obsPromise.get())
-        })
-    }
-  }))
-
   async function computer() {
     obsPending.set(true)
 
     try {
-      const newValuePromise = originalGetter.call(this)
-      obsPromise.set(newValuePromise)
-      const value = await newValuePromise
+      const value = await originalGetter.call(this)
       obsValue.set(value)
       obsPending.set(false)
       obsError.set(undefined)
