@@ -1,26 +1,24 @@
 import { action, computed, observable, reaction } from 'mobx'
 
-export function dependsOn(...anything) { }
-
-export function asyncComputed(target, key, descriptor) {
+function asyncComputedDecorator({ defaultValue }, target, key, descriptor) {
   const originalGetter = descriptor.get
 
-  const obsValue   = observable.box(undefined)
+  const obsValue   = observable.box(defaultValue)
   const obsPending = observable.box(false)
   const obsError   = observable.box(undefined)
 
   const pendingKey = key + 'Pending'
-  const errorKey = key + 'Error'
+  const errorKey   = key + 'Error'
 
   // noinspection JSUnresolvedFunction
-  Object.defineProperty( target, pendingKey, computed(target, pendingKey, {
+  Object.defineProperty(target, pendingKey, computed(target, pendingKey, {
     get() {
       return obsPending.get()
     }
   }))
 
   // noinspection JSUnresolvedFunction
-  Object.defineProperty( target,errorKey,computed(target, errorKey, {
+  Object.defineProperty(target, errorKey, computed(target, errorKey, {
     get() {
       return obsError.get()
     }
@@ -52,6 +50,15 @@ export function asyncComputed(target, key, descriptor) {
       return obsValue.get()
     }
   })
+}
+
+export function dependsOn(...anything) { }
+
+export function asyncComputed() {
+  if (arguments.length === 1 && typeof arguments[ 0 ] === 'object')
+    return asyncComputedDecorator.bind(arguments[ 0 ])
+  else
+    return asyncComputedDecorator({}, arguments[ 0 ], arguments[ 1 ], arguments[ 2 ])
 }
 
 export function asyncAction(target, key, descriptor) {
