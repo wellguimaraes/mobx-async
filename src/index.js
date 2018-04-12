@@ -1,4 +1,4 @@
-import { action, computed, observable, reaction, when } from 'mobx'
+import { action, computed, observable, reaction } from 'mobx'
 
 function asyncComputedDecorator({ initialValue }, target, key, descriptor) {
   const originalGetter = descriptor.get
@@ -6,23 +6,6 @@ function asyncComputedDecorator({ initialValue }, target, key, descriptor) {
   const obsValue   = observable.box(initialValue)
   const obsPending = observable.box(false)
   const obsError   = observable.box(undefined)
-
-  const pendingKey = key + 'Pending'
-  const errorKey   = key + 'Error'
-
-  // noinspection JSUnresolvedFunction
-  Object.defineProperty(target, pendingKey, computed(target, pendingKey, {
-    get() {
-      return obsPending.get()
-    }
-  }))
-
-  // noinspection JSUnresolvedFunction
-  Object.defineProperty(target, errorKey, computed(target, errorKey, {
-    get() {
-      return obsError.get()
-    }
-  }))
 
   async function computer() {
     obsPending.set(true)
@@ -38,16 +21,42 @@ function asyncComputedDecorator({ initialValue }, target, key, descriptor) {
     }
   }
 
-  let firstTime = true
+  const computedObj = {}
+  let firstTime     = true
 
-  return computed(target, key, {
+  // noinspection JSUnresolvedFunction
+  Object.defineProperty(target, '__' + key, computed(target, '__' + key, {
+    enumerable: false,
     get() {
       if (firstTime) {
         firstTime = false
-        reaction(() => computer.call(this), () => {})
+        obsPending.set(true)
+        reaction(() => computer.call(computedObj.context), () => {})
       }
 
       return obsValue.get()
+    }
+  }))
+
+  // noinspection JSUnresolvedFunction
+  Object.defineProperty(computedObj, 'pending', computed(computedObj, 'pending', { get: () => obsPending.get() }))
+
+  // noinspection JSUnresolvedFunction
+  Object.defineProperty(computedObj, 'error', computed(computedObj, 'error', { get: () => obsError.get() }))
+
+  // noinspection JSUnresolvedFunction
+  Object.defineProperty(computedObj, 'value', computed(computedObj, 'value', {
+    get() {
+      return computedObj.context[ '__' + key ]
+    }
+  }))
+
+  return computed(target, key, {
+    get() {
+      if (computedObj.context === undefined)
+        computedObj.context = this
+
+      return computedObj
     }
   })
 }
