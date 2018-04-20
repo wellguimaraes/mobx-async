@@ -3,12 +3,14 @@ import { action, computed, observable, reaction } from 'mobx'
 function asyncComputedDecorator({ initialValue }, target, key, descriptor) {
   const originalGetter = descriptor.get
 
-  const obsValue   = observable.box(initialValue)
-  const obsPending = observable.box(false)
-  const obsError   = observable.box(undefined)
+  const obsValue      = observable.box(initialValue)
+  const obsPending    = observable.box(false)
+  const obsError      = observable.box(undefined)
+  const timeReference = observable.box(+new Date())
 
   async function computer() {
     obsPending.set(true)
+    timeReference.get()
 
     try {
       const value = await originalGetter.call(this)
@@ -38,8 +40,14 @@ function asyncComputedDecorator({ initialValue }, target, key, descriptor) {
     }
   }))
 
+  const pendingPropDescriptor = computed(computedObj, 'pending', { get: () => obsPending.get() })
+
+  computedObj.reset = () => {
+    timeReference.set(+new Date())
+  }
+
   // noinspection JSUnresolvedFunction
-  Object.defineProperty(computedObj, 'pending', computed(computedObj, 'pending', { get: () => obsPending.get() }))
+  Object.defineProperty(computedObj, 'pending', pendingPropDescriptor)
 
   // noinspection JSUnresolvedFunction
   Object.defineProperty(computedObj, 'error', computed(computedObj, 'error', { get: () => obsError.get() }))
@@ -53,8 +61,9 @@ function asyncComputedDecorator({ initialValue }, target, key, descriptor) {
 
   return computed(target, key, {
     get() {
-      if (computedObj.context === undefined)
+      if (computedObj.context === undefined) {
         computedObj.context = this
+      }
 
       return computedObj
     }
@@ -64,10 +73,11 @@ function asyncComputedDecorator({ initialValue }, target, key, descriptor) {
 export function dependsOn(...anything) { }
 
 export function asyncComputed() {
-  if (arguments.length === 1 && typeof arguments[ 0 ] === 'object')
+  if (arguments.length === 1 && typeof arguments[ 0 ] === 'object') {
     return asyncComputedDecorator.bind(null, arguments[ 0 ])
-  else
+  } else {
     return asyncComputedDecorator({}, arguments[ 0 ], arguments[ 1 ], arguments[ 2 ])
+  }
 }
 
 export function asyncAction(target, key, descriptor) {
