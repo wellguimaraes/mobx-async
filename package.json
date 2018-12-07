@@ -1,12 +1,13 @@
 {
   "name": "mobx-async",
-  "version": "2.1.0",
+  "version": "3.0.1",
   "description": "Experimental: improving Mobx with async capabilities",
   "main": "dist/index.js",
   "scripts": {
     "prepublish": "npm run build",
-    "build": "cross-env NODE_ENV=production babel -d dist ./src"
+    "build": "tsc"
   },
+
   "author": "Wellington Guimaraes<wellguimaraes@gmail.com>",
   "license": "MIT",
   "peerDependencies": {
