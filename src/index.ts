@@ -4,10 +4,32 @@ export interface AsyncComputedConfig {
   initialValue?: any
 }
 
-export interface AsyncComputed<T> extends Promise<any> {
+export interface AsyncMember<T = any> {
   pending: boolean,
   error: Error | any,
-  value: T
+  value: T,
+  response: any,
+  success: boolean
+}
+
+export function getValue(asyncComputed: AsyncMember & any) {
+  return asyncComputed && asyncComputed.value
+}
+
+export function getError(asyncMember: AsyncMember & any) {
+  return asyncMember && asyncMember.value
+}
+
+export function isPending(asyncAction: Function & AsyncMember & any) {
+  return asyncAction && asyncAction.pending
+}
+
+export function getResponse(asyncAction: Function & AsyncMember) {
+  return asyncAction && asyncAction.response
+}
+
+export function succeeded(asyncAction: Function & AsyncMember) {
+  return asyncAction && asyncAction.success
 }
 
 export function asyncComputed({ initialValue }: AsyncComputedConfig = {}) {
