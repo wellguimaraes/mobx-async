@@ -1,10 +1,10 @@
 import { fromPromise } from 'mobx-utils'
 import { action, observable } from 'mobx'
 
-type AsyncItem = Promise<any> | (any & { asyncAction: boolean, pending: boolean })
+type AsyncItem = Promise<any> | (any & { trackedAction: boolean, pending: boolean })
 
 export const isPending = (v: AsyncItem): boolean => {
-  if (v.asyncAction)
+  if (v.trackedAction)
     return v.pending
 
   return fromPromise(Promise.resolve(v))
@@ -16,7 +16,7 @@ export const isPending = (v: AsyncItem): boolean => {
 }
 
 export const getError = (v: AsyncItem): Error | undefined => {
-  if (v.asyncAction)
+  if (v.trackedAction)
     return v.error
 
   return fromPromise(Promise.resolve(v))
@@ -38,7 +38,7 @@ export const getValue = <T>(v: Promise<T>, defaultValue?: T) =>
 
 export const dependsOn = (..._: any[]) => {}
 
-export function asyncAction(target: any, key: string, descriptor: PropertyDescriptor) {
+export function trackedAction(target: any, key: string, descriptor: PropertyDescriptor) {
   const original = descriptor.value
 
   const fnState = observable.object({
@@ -74,7 +74,7 @@ export function asyncAction(target: any, key: string, descriptor: PropertyDescri
 
   descriptor.value = actionWrapper
 
-  Object.defineProperty(actionWrapper, 'asyncAction', {
+  Object.defineProperty(actionWrapper, 'trackedAction', {
     get: () => true
   })
 

@@ -1,6 +1,6 @@
 {
   "name": "mobx-async",
-  "version": "4.0.2",
+  "version": "5.0.0",
   "description": "Mobx with extra async capabilities",
   "main": "dist/index.js",
   "scripts": {
