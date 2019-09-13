@@ -1,120 +1,47 @@
-import { action, computed, observable, reaction } from 'mobx'
+import { fromPromise } from 'mobx-utils'
+import { action, observable } from 'mobx'
 
-export interface AsyncComputedConfig {
-  initialValue?: any
-}
+type AsyncItem = Promise<any> | (any & { asyncAction: boolean, pending: boolean })
 
-export interface AsyncMember<T = any> {
-  pending: boolean,
-  error: Error | any,
-  value: T,
-  response: any,
-  success: boolean
-}
+export const isPending = (v: AsyncItem): boolean => {
+  if (v.asyncAction)
+    return v.pending
 
-export function getValue(asyncComputed: AsyncMember & any) {
-  return asyncComputed && asyncComputed.value
-}
-
-export function getError(asyncMember: AsyncMember & any) {
-  return asyncMember && asyncMember.value
-}
-
-export function isPending(asyncAction: Function & AsyncMember & any) {
-  return asyncAction && asyncAction.pending
-}
-
-export function getResponse(asyncAction: Function & AsyncMember) {
-  return asyncAction && asyncAction.response
-}
-
-export function succeeded(asyncAction: Function & AsyncMember) {
-  return asyncAction && asyncAction.success
-}
-
-export function asyncComputed({ initialValue }: AsyncComputedConfig = {}) {
-  return (target: any, key: string, descriptor: any) => {
-    const originalGetter = descriptor.get
-
-    const obsValue      = observable.box(initialValue)
-    const obsPending    = observable.box(false)
-    const obsError      = observable.box(undefined)
-    const timeReference = observable.box(+new Date())
-
-    async function computer() {
-      obsPending.set(true)
-      timeReference.get()
-
-      try {
-        if (typeof originalGetter === 'function') {
-          // @ts-ignore
-          const value = await originalGetter.call(this)
-          obsValue.set(value)
-          obsPending.set(false)
-          obsError.set(undefined)
-        }
-      } catch (err) {
-        obsPending.set(false)
-        obsError.set(err)
-      }
-    }
-
-    const computedObj = {} as any
-    let firstTime     = true
-
-    // noinspection JSUnresolvedFunction
-    Object.defineProperty(target, '__' + key, computed(target, '__' + key, {
-      enumerable: false,
-      get() {
-        if (firstTime) {
-          firstTime = false
-          obsPending.set(true)
-          reaction(() => computer.call(computedObj.context), () => {
-          })
-        }
-
-        return obsValue.get()
-      }
-    }) as any)
-
-    const pendingPropDescriptor = computed(computedObj, 'pending', { get: () => obsPending.get() })
-
-    computedObj.reset = () => {
-      timeReference.set(+new Date())
-    }
-
-    // noinspection JSUnresolvedFunction
-    Object.defineProperty(computedObj, 'pending', pendingPropDescriptor as any)
-
-    // noinspection JSUnresolvedFunction
-    Object.defineProperty(computedObj, 'error', computed(computedObj, 'error', { get: () => obsError.get() }) as any)
-
-    // noinspection JSUnresolvedFunction
-    Object.defineProperty(computedObj, 'value', computed(computedObj, 'value', {
-      get() {
-        return computedObj.context['__' + key]
-      }
-    }) as any)
-
-    return computed(target, key, {
-      get() {
-        if (computedObj.context === undefined) {
-          computedObj.context = this
-        }
-
-        return computedObj
-      }
+  return fromPromise(Promise.resolve(v))
+    .case({
+      fulfilled: () => false,
+      pending: () => true,
+      rejected: () => false,
     })
-  }
 }
 
-export function dependsOn(...anything: Array<any>) {
+export const getError = (v: AsyncItem): Error | undefined => {
+  if (v.asyncAction)
+    return v.error
+
+  return fromPromise(Promise.resolve(v))
+    .case({
+      fulfilled: () => undefined,
+      pending: () => undefined,
+      rejected: (err) => err,
+    })
 }
+
+export const succeeded = (action: AsyncItem) => action && action.success
+
+export const getValue = <T>(v: Promise<T>, defaultValue?: T) =>
+  fromPromise(Promise.resolve(v)).case({
+    fulfilled: (v) => v,
+    pending: () => defaultValue,
+    rejected: () => defaultValue,
+  })
+
+export const dependsOn = (..._: any[]) => {}
 
 export function asyncAction(target: any, key: string, descriptor: PropertyDescriptor) {
   const original = descriptor.value
 
-  const fnState = observable<{ pending: boolean, success: boolean, error: any, response: any }>({
+  const fnState = observable.object({
     pending : false,
     success : false,
     error   : undefined,
@@ -128,7 +55,7 @@ export function asyncAction(target: any, key: string, descriptor: PropertyDescri
     fnState.response = undefined
 
     return Promise
-    // @ts-ignore
+      // @ts-ignore
       .resolve(original.apply(this, arguments))
       .then(
         (response) => {
@@ -143,9 +70,13 @@ export function asyncAction(target: any, key: string, descriptor: PropertyDescri
           fnState.error    = err
         }
       )
-  })
+  }.bind(target))
 
   descriptor.value = actionWrapper
+
+  Object.defineProperty(actionWrapper, 'asyncAction', {
+    get: () => true
+  })
 
   Object.defineProperty(actionWrapper, 'pending', {
     get: () => fnState.pending
