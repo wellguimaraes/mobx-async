@@ -4,8 +4,7 @@
     "module": "commonjs",
     "declaration": true,
     "lib": [
-      "es7",
-      "es2017.object"
+      "ESNext"
     ],
     "outDir": "dist",
     "strict": true,
