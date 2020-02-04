@@ -2,17 +2,17 @@
 # yarn lockfile v1
 
 
-mobx-utils@^5.4.1:
-  version "5.4.1"
-  resolved "https://registry.yarnpkg.com/mobx-utils/-/mobx-utils-5.4.1.tgz#18ff5f9723b27e1ff50ae0b362938a4792eb077a"
-  integrity sha512-u5BSvFiSx1ZkzBz/7V96RB7xWn7oOFwczI+AVi1v8TV8HbT8rXLco1Aqb87tEA8Jsc2e5uvTwHdYoiv81qspaA==
+mobx-utils@^5.5.3:
+  version "5.5.3"
+  resolved "https://registry.yarnpkg.com/mobx-utils/-/mobx-utils-5.5.3.tgz#8649dce7cfcdb98bf76a729ed2339882cb45e134"
+  integrity sha512-tCj3WLHp3y2/OZADAg9KHGtJNNwwEa8ZY92E6dnVuDoV2OaTV+e2N4S23ogsoxJ72ZhFJhNPcy7ppPJRb1Emhg==
 
-mobx@^5.13.0:
-  version "5.13.0"
-  resolved "https://registry.yarnpkg.com/mobx/-/mobx-5.13.0.tgz#0fd68f10aa5ff2d146a4ed9e145b53337cfbca59"
-  integrity sha512-eSAntMSMNj0PFL705rgv+aB/z1RjNqDnFEpBe18yQVreXTWiVgIrmBUXzjnJfuba+eo4eAk6zi+/gXQkSUea8A==
+mobx@^5.15.4:
+  version "5.15.4"
+  resolved "https://registry.yarnpkg.com/mobx/-/mobx-5.15.4.tgz#9da1a84e97ba624622f4e55a0bf3300fb931c2ab"
+  integrity sha512-xRFJxSU2Im3nrGCdjSuOTFmxVDGeqOHL+TyADCGbT0k4HHqGmx5u2yaHNryvoORpI4DfbzjJ5jPmuv+d7sioFw==
 
-typescript@^3.6.3:
-  version "3.6.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.6.3.tgz#fea942fabb20f7e1ca7164ff626f1a9f3f70b4da"
-  integrity sha512-N7bceJL1CtRQ2RiG0AQME13ksR7DiuQh/QehubYcghzv20tnh+MQnQIuJddTmsbqYj+dztchykemz0zFzlvdQw==
+typescript@^3.7.5:
+  version "3.7.5"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.7.5.tgz#0692e21f65fd4108b9330238aac11dd2e177a1ae"
+  integrity sha512-/P5lkRXkWHNAbcJIiHPfRoKqyd7bsyCma1hZNUGfn20qm64T6ZBlrzprymeu918H+mB/0rIg2gGK/BXkhhYgBw==

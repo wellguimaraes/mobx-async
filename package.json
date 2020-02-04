@@ -1,6 +1,6 @@
 {
   "name": "mobx-async",
-  "version": "5.0.0",
+  "version": "6.1.1",
   "description": "Mobx with extra async capabilities",
   "main": "dist/index.js",
   "scripts": {
@@ -9,16 +9,9 @@
   },
   "author": "Wellington Guimaraes<wellguimaraes@gmail.com>",
   "license": "MIT",
-  "peerDependencies": {
-    "mobx": "^5.13.0",
-    "prop-types": "^15.6.1",
-    "react": "^16.2.0"
-  },
-  "devDependencies": {
-    "mobx": "^5.13.0",
-    "typescript": "^3.6.3"
-  },
   "dependencies": {
-    "mobx-utils": "^5.4.1"
+    "mobx": "^5.15.4",
+    "mobx-utils": "^5.5.3",
+    "typescript": "^3.7.5"
   }
 }
