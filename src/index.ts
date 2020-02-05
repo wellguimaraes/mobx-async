@@ -1,10 +1,19 @@
+import { observable, runInAction } from 'mobx'
 import { fromPromise } from 'mobx-utils'
-import { action, observable, runInAction } from 'mobx'
 
-type AsyncItem = Promise<any> | (any & { trackedAction: boolean; pending: boolean })
+interface TrackedAction {
+  trackedAction: boolean
+  pending: boolean
+  error?: Error
+  response?: any
+  success: boolean
+  reset: () => void
+}
+
+type AsyncItem = Promise<any> | TrackedAction
 
 export const isPending = (v: AsyncItem): boolean => {
-  if (v && v.trackedAction) return v.pending
+  if ((v as TrackedAction)?.trackedAction) return (v as TrackedAction).pending
 
   return fromPromise(Promise.resolve(v)).case({
     fulfilled: () => false,
@@ -14,7 +23,7 @@ export const isPending = (v: AsyncItem): boolean => {
 }
 
 export const getError = (v: AsyncItem): Error | undefined => {
-  if (v && v.trackedAction) return v.error
+  if ((v as TrackedAction)?.trackedAction) return (v as TrackedAction)?.error
 
   return fromPromise(Promise.resolve(v)).case({
     fulfilled: () => undefined,
@@ -23,7 +32,7 @@ export const getError = (v: AsyncItem): Error | undefined => {
   })
 }
 
-export const succeeded = (action: AsyncItem) => action && action.success
+export const succeeded = (action: TrackedAction) => action && action.success
 
 export const getValue = <T>(v: Promise<T>, defaultValue?: T) =>
   fromPromise(Promise.resolve(v)).case({
@@ -34,13 +43,14 @@ export const getValue = <T>(v: Promise<T>, defaultValue?: T) =>
 
 export const dependsOn = (..._: any[]) => {}
 
-export const resetter = (action: AsyncItem) => {
-  if (action && action.trackedAction) return action.reset
+export const resetter = (action: TrackedAction) => {
+  if (action?.trackedAction) return action.reset
 
   return () => {}
 }
 
-export function trackedAction(fn: () => any) {
+
+export function trackedAction<T extends (...args: any[]) => void>(fn: T): T & TrackedAction {
   const fnState = observable.object({
     pending: false,
     success: false,
@@ -63,11 +73,10 @@ export function trackedAction(fn: () => any) {
         }
       })
     }).then(
-      response => {
+      (response: any) => {
         fnState.pending = false
         fnState.success = true
         fnState.error = undefined
-        // @ts-ignore
         fnState.response = response
       },
       err => {
@@ -77,10 +86,6 @@ export function trackedAction(fn: () => any) {
       }
     )
   }
-
-  Object.defineProperty(actionWrapper, 'trackedAction', {
-    get: () => true,
-  })
 
   Object.defineProperty(actionWrapper, 'pending', {
     get: () => fnState.pending,
@@ -98,6 +103,7 @@ export function trackedAction(fn: () => any) {
     get: () => fnState.success,
   })
 
+  actionWrapper.trackedAction = true
   actionWrapper.reset = () => {
     fnState.pending = false
     fnState.success = false
