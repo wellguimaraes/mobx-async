@@ -34,7 +34,7 @@ export const getError = (v: AsyncItem): Error | undefined => {
 
 export const succeeded = (action: TrackedAction) => action && action.success
 
-export const getValue = <T>(v: Promise<T>, defaultValue?: T) =>
+export const getValue = <T>(v: Promise<T>, defaultValue?: T): T | undefined =>
   fromPromise(Promise.resolve(v)).case({
     fulfilled: (v: any) => v,
     pending: () => defaultValue,
@@ -49,7 +49,6 @@ export const resetter = (action: TrackedAction) => {
   return () => {}
 }
 
-
 export function trackedAction<T extends (...args: any[]) => void>(fn: T): T & TrackedAction {
   const fnState = observable.object({
     pending: false,
@@ -59,10 +58,12 @@ export function trackedAction<T extends (...args: any[]) => void>(fn: T): T & Tr
   })
 
   const actionWrapper: any = function(...args: any[]) {
-    fnState.pending = true
-    fnState.success = false
-    fnState.error = undefined
-    fnState.response = undefined
+    runInAction(() => {
+      fnState.pending = true
+      fnState.success = false
+      fnState.error = undefined
+      fnState.response = undefined
+    })
 
     return new Promise((resolve, reject) => {
       runInAction(() => {
@@ -73,17 +74,19 @@ export function trackedAction<T extends (...args: any[]) => void>(fn: T): T & Tr
         }
       })
     }).then(
-      (response: any) => {
-        fnState.pending = false
-        fnState.success = true
-        fnState.error = undefined
-        fnState.response = response
-      },
-      err => {
-        fnState.response = undefined
-        fnState.pending = false
-        fnState.error = err
-      }
+      (response: any) =>
+        runInAction(() => {
+          fnState.pending = false
+          fnState.success = true
+          fnState.error = undefined
+          fnState.response = response
+        }),
+      err =>
+        runInAction(() => {
+          fnState.response = undefined
+          fnState.pending = false
+          fnState.error = err
+        })
     )
   }
 
