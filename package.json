@@ -1,8 +1,9 @@
 {
   "name": "mobx-async",
-  "version": "6.3.1",
+  "version": "6.3.2",
   "description": "Mobx with extra async capabilities",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "prepublish": "yarn build",
     "build": "tsc"
