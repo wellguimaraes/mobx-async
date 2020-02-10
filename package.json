@@ -1,6 +1,6 @@
 {
   "name": "mobx-async",
-  "version": "6.3.3",
+  "version": "6.4.0",
   "description": "Mobx with extra async capabilities",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
