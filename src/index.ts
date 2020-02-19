@@ -1,7 +1,19 @@
-import { observable, runInAction } from 'mobx'
+import {
+  IComputedValue,
+  IObservable,
+  IObservableArray,
+  IObservableObject,
+  IObservableValue,
+  observable,
+  ObservableMap,
+  ObservableSet,
+  runInAction,
+} from 'mobx'
 import { fromPromise } from 'mobx-utils'
 
-interface TrackedAction {
+type IFunction = (...args: any[]) => void
+
+interface TrackedAction extends IFunction {
   trackedAction: boolean
   pending: boolean
   error?: Error
@@ -10,12 +22,28 @@ interface TrackedAction {
   reset: () => void
 }
 
-type AsyncItem = Promise<any> | TrackedAction
+type AsyncItem<T = any> = Promise<T> | TrackedAction | IGettable<T> | IFunction
 
-export const isPending = (v: AsyncItem): boolean => {
-  if ((v as TrackedAction)?.trackedAction) return (v as TrackedAction).pending
+type IGettable<T = any> =
+  | IObservable
+  | IComputedValue<T>
+  | IObservableValue<T>
+  | IObservableObject
+  | IObservableArray
+  | ObservableMap
+  | ObservableSet
 
-  return fromPromise(Promise.resolve(v)).case({
+
+export function isPending(v: AsyncItem): boolean {
+  validateTrackedAction(v)
+
+  if ((v as TrackedAction)?.trackedAction) {
+    return (v as TrackedAction).pending
+  }
+
+  const value = toPromise(v as IGettable)
+
+  return fromPromise(value).case({
     fulfilled: () => false,
     pending: () => true,
     rejected: () => false,
@@ -23,33 +51,48 @@ export const isPending = (v: AsyncItem): boolean => {
 }
 
 export const getError = (v: AsyncItem): Error | undefined => {
-  if ((v as TrackedAction)?.trackedAction) return (v as TrackedAction)?.error
+  validateTrackedAction(v)
 
-  return fromPromise(Promise.resolve(v)).case({
+  if ((v as TrackedAction)?.trackedAction) {
+    return (v as TrackedAction)?.error
+  }
+
+  const value = toPromise(v as IGettable)
+
+  return fromPromise(value).case({
     fulfilled: () => undefined,
     pending: () => undefined,
     rejected: (err: Error) => err,
   })
 }
 
-export const succeeded = (action: TrackedAction) => action && action.success
+export const succeeded = (action: TrackedAction | IFunction) => {
+  validateTrackedAction(action)
 
-export const getValue = <T>(v: Promise<T>, defaultValue?: T): T | undefined =>
-  fromPromise(Promise.resolve(v)).case({
+  return (action as TrackedAction)?.success
+}
+
+export const getValue = <T>(v: IGettable<Promise<T>> | Promise<T>, defaultValue?: T): T | undefined => {
+  const value = toPromise(v)
+
+  return fromPromise(value).case({
     fulfilled: (v: any) => v,
     pending: () => defaultValue,
     rejected: () => defaultValue,
   })
-
-export const dependsOn = (..._: any[]) => {}
-
-export const resetter = (action: TrackedAction) => {
-  if (action?.trackedAction) return action.reset
-
-  return () => {}
 }
 
-export function trackedAction<T extends (...args: any[]) => void>(fn: T): T & TrackedAction {
+export const resetter = (action: TrackedAction | IFunction): (() => void) => {
+  validateTrackedAction(action)
+
+  return (action as TrackedAction)?.reset || (() => {})
+}
+
+function trackedAction<T extends TrackedAction>(actionBody: T): T
+function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: PropertyDescriptor): void
+function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: PropertyDescriptor): void {
+  const fn = baseDescriptor ? baseDescriptor.value : target
+
   const fnState = observable.object({
     pending: false,
     success: false,
@@ -114,5 +157,38 @@ export function trackedAction<T extends (...args: any[]) => void>(fn: T): T & Tr
     fnState.response = undefined
   }
 
-  return actionWrapper
+  if (baseDescriptor) {
+    baseDescriptor.value = actionWrapper
+  } else {
+    return actionWrapper
+  }
+}
+
+export { trackedAction }
+
+function validateTrackedAction(v: any) {
+  if (typeof v === 'function' && !v.hasOwnProperty('trackedAction')) {
+    throw new Error(`${v.name} is not a tracked action`)
+  }
+}
+
+function toPromise<T>(
+  v:
+    | IObservable
+    | IComputedValue<Promise<T>>
+    | IObservableValue<Promise<T>>
+    | IObservableObject
+    | IObservableArray
+    | ObservableMap
+    | ObservableSet
+    | Promise<T>
+) {
+  const value =
+    v instanceof Promise
+      ? Promise.resolve(v)
+      : v && typeof (v as any).get === 'function'
+      ? Promise.resolve((v as any).get())
+      : Promise.resolve()
+
+  return value
 }
