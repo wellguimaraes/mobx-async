@@ -33,7 +33,6 @@ type IGettable<T = any> =
   | ObservableMap
   | ObservableSet
 
-
 export function isPending(v: AsyncItem): boolean {
   validateTrackedAction(v)
 
@@ -72,7 +71,8 @@ export const succeeded = (action: TrackedAction | IFunction) => {
   return (action as TrackedAction)?.success
 }
 
-export const getValue = <T>(v: IGettable<Promise<T>> | Promise<T>, defaultValue?: T): T | undefined => {
+function getValue<T>(v: IGettable<Promise<T>> | Promise<T>, defaultValue: T): T
+function getValue<T>(v: IGettable<Promise<T>> | Promise<T>, defaultValue?: T): T | undefined {
   const value = toPromise(v)
 
   return fromPromise(value).case({
@@ -81,6 +81,8 @@ export const getValue = <T>(v: IGettable<Promise<T>> | Promise<T>, defaultValue?
     rejected: () => defaultValue,
   })
 }
+
+export { getValue }
 
 export const resetter = (action: TrackedAction | IFunction): (() => void) => {
   validateTrackedAction(action)
@@ -111,7 +113,7 @@ function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: P
     return new Promise((resolve, reject) => {
       runInAction(() => {
         try {
-          resolve(fn.apply(undefined, args as any))
+          resolve(fn.apply(target, args as any))
         } catch (err) {
           reject(err)
         }
