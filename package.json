@@ -1,6 +1,6 @@
 {
   "name": "mobx-async",
-  "version": "8.2.2",
+  "version": "8.2.4",
   "description": "Mobx with extra async capabilities",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -16,6 +16,6 @@
   "devDependencies": {
     "mobx": "^5.15.4",
     "mobx-utils": "^5.5.3",
-    "typescript": "^3.7.5"
+    "typescript": "^3.8.3"
   }
 }
