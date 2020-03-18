@@ -71,8 +71,7 @@ export const succeeded = (action: TrackedAction | IFunction) => {
   return (action as TrackedAction)?.success
 }
 
-function getValue<T>(v: IGettable<Promise<T>> | Promise<T>, defaultValue: T): T
-function getValue<T>(v: IGettable<Promise<T>> | Promise<T>, defaultValue?: T): T | undefined {
+function getValue<T, D extends T>(v: IGettable<Promise<T>> | Promise<T>, defaultValue?: D): T | D {
   const value = toPromise(v)
 
   return fromPromise(value).case({
@@ -102,7 +101,7 @@ function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: P
     response: undefined,
   })
 
-  const actionWrapper: any = function(...args: any[]) {
+  const actionWrapper: any = function(this: any, ...args: any[]) {
     runInAction(() => {
       fnState.pending = true
       fnState.success = false
@@ -113,7 +112,7 @@ function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: P
     return new Promise((resolve, reject) => {
       runInAction(() => {
         try {
-          resolve(fn.apply(target, args as any))
+          resolve(fn.apply(this, args as any))
         } catch (err) {
           reject(err)
         }
