@@ -1,11 +1,11 @@
 {
   "name": "mobx-async",
-  "version": "8.2.1",
+  "version": "8.2.2",
   "description": "Mobx with extra async capabilities",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "prepare": "tsc"
+    "prepublishOnly": "tsc"
   },
   "author": "Wellington Guimaraes<wellguimaraes@gmail.com>",
   "license": "MIT",
