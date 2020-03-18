@@ -7,7 +7,7 @@ import {
   observable,
   ObservableMap,
   ObservableSet,
-  runInAction,
+  runInAction
 } from 'mobx'
 import { fromPromise } from 'mobx-utils'
 
@@ -45,7 +45,7 @@ export function isPending(v: AsyncItem): boolean {
   return fromPromise(value).case({
     fulfilled: () => false,
     pending: () => true,
-    rejected: () => false,
+    rejected: () => false
   })
 }
 
@@ -61,7 +61,7 @@ export const getError = (v: AsyncItem): Error | undefined => {
   return fromPromise(value).case({
     fulfilled: () => undefined,
     pending: () => undefined,
-    rejected: (err: Error) => err,
+    rejected: (err: Error) => err
   })
 }
 
@@ -77,7 +77,7 @@ function getValue<T, D extends T>(v: IGettable<Promise<T>> | Promise<T>, default
   return fromPromise(value).case({
     fulfilled: (v: any) => v,
     pending: () => defaultValue,
-    rejected: () => defaultValue,
+    rejected: () => defaultValue
   })
 }
 
@@ -92,13 +92,13 @@ export const resetter = (action: TrackedAction | IFunction): (() => void) => {
 function trackedAction<T extends TrackedAction>(actionBody: T): T
 function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: PropertyDescriptor): void
 function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: PropertyDescriptor): void {
-  const fn = baseDescriptor ? baseDescriptor.value : target
+  let fn = baseDescriptor ? baseDescriptor.value : target
 
   const fnState = observable.object({
     pending: false,
     success: false,
     error: undefined,
-    response: undefined,
+    response: undefined
   })
 
   const actionWrapper: any = function(this: any, ...args: any[]) {
@@ -125,7 +125,7 @@ function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: P
           fnState.error = undefined
           fnState.response = response
         }),
-      err =>
+      (err) =>
         runInAction(() => {
           fnState.response = undefined
           fnState.pending = false
@@ -135,19 +135,19 @@ function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: P
   }
 
   Object.defineProperty(actionWrapper, 'pending', {
-    get: () => fnState.pending,
+    get: () => fnState.pending
   })
 
   Object.defineProperty(actionWrapper, 'error', {
-    get: () => fnState.error,
+    get: () => fnState.error
   })
 
   Object.defineProperty(actionWrapper, 'response', {
-    get: () => fnState.response,
+    get: () => fnState.response
   })
 
   Object.defineProperty(actionWrapper, 'success', {
-    get: () => fnState.success,
+    get: () => fnState.success
   })
 
   actionWrapper.trackedAction = true
@@ -159,7 +159,15 @@ function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: P
   }
 
   if (baseDescriptor) {
-    baseDescriptor.value = actionWrapper
+    return {
+      configurable: true,
+      get() {
+        return actionWrapper.bind(this)
+      },
+      set(newFn: any) {
+        fn = newFn
+      }
+    } as any
   } else {
     return actionWrapper
   }
