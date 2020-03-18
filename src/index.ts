@@ -159,10 +159,17 @@ function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: P
   }
 
   if (baseDescriptor) {
+    let firstRun = true
+
     return {
       configurable: true,
-      get() {
-        return actionWrapper.bind(this)
+      get: function(this: any) {
+        if (firstRun === true) {
+          fn = fn.bind(this)
+          firstRun = false
+        }
+
+        return actionWrapper
       },
       set(newFn: any) {
         fn = newFn

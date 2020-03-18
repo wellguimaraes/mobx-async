@@ -17,5 +17,9 @@
     "mobx": "^5.15.4",
     "mobx-utils": "^5.5.3",
     "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "@types/memoizee": "^0.4.3",
+    "memoizee": "^0.4.14"
   }
 }
