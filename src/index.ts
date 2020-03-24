@@ -151,12 +151,13 @@ function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: P
   })
 
   actionWrapper.trackedAction = true
-  actionWrapper.reset = () => {
-    fnState.pending = false
-    fnState.success = false
-    fnState.error = undefined
-    fnState.response = undefined
-  }
+  actionWrapper.reset = () =>
+    runInAction(() => {
+      fnState.pending = false
+      fnState.success = false
+      fnState.error = undefined
+      fnState.response = undefined
+    })
 
   if (baseDescriptor) {
     let firstRun = true
