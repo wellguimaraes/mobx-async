@@ -71,7 +71,7 @@ export const succeeded = (action: TrackedAction | IFunction) => {
   return (action as TrackedAction)?.success
 }
 
-function getValue<T, D extends T>(v: IGettable<Promise<T>> | Promise<T>, defaultValue?: D): T | D {
+function getValue<T, D extends T>(v: IGettable<Promise<T>> | Promise<T>, defaultValue?: D): T | D | undefined {
   const value = toPromise(v)
 
   return fromPromise(value).case({
