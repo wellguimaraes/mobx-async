@@ -71,13 +71,13 @@ export const succeeded = (action: TrackedAction | IFunction) => {
   return (action as TrackedAction)?.success
 }
 
-function getValue<T, D extends T | undefined>(v: IGettable<Promise<T>> | Promise<T>, defaultValue?: D): T | D {
+function getValue<T>(v: IGettable<Promise<T>> | Promise<T>): T | undefined {
   const value = toPromise(v)
 
   return fromPromise(value).case({
     fulfilled: (v: any) => v,
-    pending: () => defaultValue,
-    rejected: () => defaultValue
+    pending: () => undefined,
+    rejected: () => undefined
   })
 }
 
@@ -180,7 +180,7 @@ function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: P
 
     return {
       configurable: true,
-      get: function(this: any) {
+      get: function (this: any) {
         if (firstRun === true) {
           fn = fn.bind(this)
           firstRun = false
