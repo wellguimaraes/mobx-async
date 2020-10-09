@@ -89,6 +89,14 @@ export const resetter = (action: TrackedAction | IFunction): (() => void) => {
   return (action as TrackedAction)?.reset || (() => {})
 }
 
+export function dependsOn(...dependencies: AsyncItem[]) {
+  void dependencies.map((it: any) => {
+    if (it?.constructor?.name === 'ObservableValue') return it?.get?.()
+    if (it?.constructor?.name === 'ComputedValue') return it?.get?.()
+    if (it?.trackedAction) return void it?.successVersion?.get()
+  })
+}
+
 function trackedAction<T extends TrackedAction>(actionBody: T): T
 function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: PropertyDescriptor): void
 function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: PropertyDescriptor): void {
@@ -101,7 +109,9 @@ function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: P
     response: undefined
   })
 
-  const actionWrapper: any = function(this: any, ...args: any[]) {
+  const successVersion = observable.box(0)
+
+  const actionWrapper: any = function (this: any, ...args: any[]) {
     runInAction(() => {
       fnState.pending = true
       fnState.success = false
@@ -120,12 +130,13 @@ function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: P
     }).then(
       (response: any) =>
         runInAction(() => {
+          successVersion.set(successVersion.get() + 1)
           fnState.pending = false
           fnState.success = true
           fnState.error = undefined
           fnState.response = response
         }),
-      (err) =>
+      err =>
         runInAction(() => {
           fnState.response = undefined
           fnState.pending = false
@@ -133,6 +144,11 @@ function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: P
         })
     )
   }
+
+  Object.defineProperty(actionWrapper, 'successVersion', {
+    enumerable: false,
+    value: successVersion
+  })
 
   Object.defineProperty(actionWrapper, 'pending', {
     get: () => fnState.pending
