@@ -128,20 +128,26 @@ function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: P
         }
       })
     }).then(
-      (response: any) =>
+      (response: any) => {
         runInAction(() => {
           successVersion.set(successVersion.get() + 1)
           fnState.pending = false
           fnState.success = true
           fnState.error = undefined
           fnState.response = response
-        }),
-      err =>
+        })
+
+        return Promise.resolve(response)
+      },
+      err => {
         runInAction(() => {
           fnState.response = undefined
           fnState.pending = false
           fnState.error = err
         })
+
+        return Promise.reject(err)
+      }
     )
   }
 
