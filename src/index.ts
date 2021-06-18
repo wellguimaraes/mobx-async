@@ -2,7 +2,6 @@ import {
   IComputedValue,
   IObservable,
   IObservableArray,
-  IObservableObject,
   IObservableValue,
   observable,
   ObservableMap,
@@ -10,6 +9,7 @@ import {
   runInAction
 } from 'mobx'
 import { fromPromise } from 'mobx-utils'
+import { IIsObservableObject } from 'mobx/src/internal'
 
 type IFunction = (...args: any[]) => void
 
@@ -28,7 +28,6 @@ type IGettable<T = any> =
   | IObservable
   | IComputedValue<T>
   | IObservableValue<T>
-  | IObservableObject
   | IObservableArray
   | ObservableMap
   | ObservableSet
@@ -216,7 +215,7 @@ function toPromise<T>(
     | IObservable
     | IComputedValue<Promise<T>>
     | IObservableValue<Promise<T>>
-    | IObservableObject
+    | IIsObservableObject
     | IObservableArray
     | ObservableMap
     | ObservableSet
