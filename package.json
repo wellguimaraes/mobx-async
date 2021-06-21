@@ -1,22 +1,57 @@
 {
-  "name": "mobx-async",
   "version": "12.0.0",
-  "description": "Mobx with extra async capabilities",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "scripts": {
-    "prepublishOnly": "tsc"
-  },
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "author": "Wellington Guimaraes<wellguimaraes@gmail.com>",
   "license": "MIT",
-  "peerDependencies": {
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
+  "scripts": {
+    "build": "tsdx build",
+    "lint": "tsdx lint",
+    "prepare": "tsdx build",
+    "size": "size-limit",
+    "analyze": "size-limit --why",
+    "prepublishOnly": "yarn build"
+  },
+  "peerDependencies": {},
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
+  "name": "mobx-async",
+  "module": "dist/mobx-async.esm.js",
+  "size-limit": [
+    {
+      "path": "dist/mobx-async.cjs.production.min.js",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/mobx-async.esm.js",
+      "limit": "10 KB"
+    }
+  ],
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^4.12.0",
+    "husky": "^6.0.0",
+    "size-limit": "^4.12.0",
+    "tsdx": "^0.14.1",
+    "tslib": "^2.3.0",
+    "typescript": "^4.3.4",
     "mobx": "^6.3.2",
     "mobx-utils": "^6.0.4"
-  },
-  "devDependencies": {
-    "mobx": "^6.3.2",
-    "mobx-utils": "^6.0.4",
-    "typescript": "^4.3.2"
   },
   "dependencies": {
     "@types/memoizee": "^0.4.5",

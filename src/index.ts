@@ -9,7 +9,7 @@ import {
   runInAction
 } from 'mobx'
 import { fromPromise } from 'mobx-utils'
-import { IIsObservableObject } from 'mobx/src/internal'
+import { IIsObservableObject } from 'mobx/dist/internal'
 
 type IFunction = (...args: any[]) => void
 
@@ -97,8 +97,8 @@ export function dependsOn(...dependencies: AsyncItem[]) {
 }
 
 function trackedAction<T extends TrackedAction>(actionBody: T): T
-function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: PropertyDescriptor): void
-function trackedAction(target: Object, key?: string | symbol, baseDescriptor?: PropertyDescriptor): void {
+function trackedAction(target: Object, _?: string | symbol, baseDescriptor?: PropertyDescriptor): void
+function trackedAction(target: Object, _?: string | symbol, baseDescriptor?: PropertyDescriptor): void {
   let fn = baseDescriptor ? baseDescriptor.value : target
 
   const fnState = observable.object({
