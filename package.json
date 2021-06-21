@@ -31,20 +31,8 @@
   },
   "name": "mobx-async",
   "module": "dist/mobx-async.esm.js",
-  "size-limit": [
-    {
-      "path": "dist/mobx-async.cjs.production.min.js",
-      "limit": "10 KB"
-    },
-    {
-      "path": "dist/mobx-async.esm.js",
-      "limit": "10 KB"
-    }
-  ],
   "devDependencies": {
-    "@size-limit/preset-small-lib": "^4.12.0",
     "husky": "^6.0.0",
-    "size-limit": "^4.12.0",
     "tsdx": "^0.14.1",
     "tslib": "^2.3.0",
     "typescript": "^4.3.4",
