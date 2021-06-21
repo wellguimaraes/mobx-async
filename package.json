@@ -1,6 +1,6 @@
 {
   "name": "mobx-async",
-  "version": "11.0.0",
+  "version": "12.0.0",
   "description": "Mobx with extra async capabilities",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -10,16 +10,16 @@
   "author": "Wellington Guimaraes<wellguimaraes@gmail.com>",
   "license": "MIT",
   "peerDependencies": {
-    "mobx": "^5.15.4",
-    "mobx-utils": "^5.5.3"
+    "mobx": "^6.3.2",
+    "mobx-utils": "^6.0.4"
   },
   "devDependencies": {
-    "mobx": "^5.15.4",
-    "mobx-utils": "^5.5.3",
-    "typescript": "^3.8.3"
+    "mobx": "^6.3.2",
+    "mobx-utils": "^6.0.4",
+    "typescript": "^4.3.2"
   },
   "dependencies": {
-    "@types/memoizee": "^0.4.3",
-    "memoizee": "^0.4.14"
+    "@types/memoizee": "^0.4.5",
+    "memoizee": "^0.4.15"
   }
 }
