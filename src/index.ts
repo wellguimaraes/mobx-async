@@ -239,3 +239,13 @@ function toPromise<T>(
 
   return value;
 }
+
+function useMobx<T>(v: IGettable<Promise<T>> | Promise<T>) {
+  const value = getValue(v);
+  const error = getError(v);
+  const pending = isPending(v);
+
+  return [value, pending, error];
+}
+
+export { useMobx };
