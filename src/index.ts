@@ -32,7 +32,30 @@ type IGettable<T = any> =
   | ObservableMap
   | ObservableSet;
 
-export function isPending(v: AsyncItem): boolean {
+const validateTrackedAction = (v: any) => {
+  if (typeof v === 'function' && !v.hasOwnProperty('trackedAction')) {
+    throw new Error(`${v.name} is not a tracked action`);
+  }
+};
+
+const toPromise = <T>(
+  v:
+    | IObservable
+    | IComputedValue<Promise<T>>
+    | IObservableValue<Promise<T>>
+    | IIsObservableObject
+    | IObservableArray
+    | ObservableMap
+    | ObservableSet
+    | Promise<T>
+) =>
+  v instanceof Promise
+    ? Promise.resolve(v)
+    : v && typeof (v as any).get === 'function'
+    ? Promise.resolve((v as any).get())
+    : Promise.resolve();
+
+export const isPending = (v: AsyncItem): boolean => {
   validateTrackedAction(v);
 
   if ((v as TrackedAction)?.trackedAction) {
@@ -46,7 +69,7 @@ export function isPending(v: AsyncItem): boolean {
     pending: () => true,
     rejected: () => false,
   });
-}
+};
 
 export const getError = (v: AsyncItem): Error | undefined => {
   validateTrackedAction(v);
@@ -70,7 +93,7 @@ export const succeeded = (action: TrackedAction | IFunction) => {
   return (action as TrackedAction)?.success;
 };
 
-function getValue<T>(v: IGettable<Promise<T>> | Promise<T>): T | undefined {
+const getValue = <T>(v: IGettable<Promise<T>> | Promise<T>): T | undefined => {
   const value = toPromise(v);
 
   return fromPromise(value).case({
@@ -78,7 +101,7 @@ function getValue<T>(v: IGettable<Promise<T>> | Promise<T>): T | undefined {
     pending: () => undefined,
     rejected: () => undefined,
   });
-}
+};
 
 export { getValue };
 
@@ -154,7 +177,12 @@ function trackedAction(
           fnState.error = err;
         });
 
-        return Promise.reject(err);
+        const isLocalHost = /^localhost(:\d+)?/.test(window.location.host);
+        if (isLocalHost) {
+          console.error(`Mobx async got an error:`, err);
+        }
+
+        return isLocalHost ? Promise.resolve(null) : Promise.reject(err);
       }
     );
   };
@@ -195,7 +223,7 @@ function trackedAction(
     return {
       configurable: true,
       get: function(this: any) {
-        if (firstRun === true) {
+        if (firstRun) {
           fn = fn.bind(this);
           firstRun = false;
         }
@@ -212,30 +240,3 @@ function trackedAction(
 }
 
 export { trackedAction };
-
-function validateTrackedAction(v: any) {
-  if (typeof v === 'function' && !v.hasOwnProperty('trackedAction')) {
-    throw new Error(`${v.name} is not a tracked action`);
-  }
-}
-
-function toPromise<T>(
-  v:
-    | IObservable
-    | IComputedValue<Promise<T>>
-    | IObservableValue<Promise<T>>
-    | IIsObservableObject
-    | IObservableArray
-    | ObservableMap
-    | ObservableSet
-    | Promise<T>
-) {
-  const value =
-    v instanceof Promise
-      ? Promise.resolve(v)
-      : v && typeof (v as any).get === 'function'
-      ? Promise.resolve((v as any).get())
-      : Promise.resolve();
-
-  return value;
-}
