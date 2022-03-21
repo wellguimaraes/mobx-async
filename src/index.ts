@@ -177,7 +177,7 @@ function trackedAction(
           fnState.error = err;
         });
 
-        const isLocalHost = /^localhost(:\d+)?/.test(window.location.host);
+        const isLocalHost = /^localhost(:\d+)?/.test(window?.location?.host);
         if (isLocalHost) {
           console.error(`Mobx async got an error:`, err);
         }
