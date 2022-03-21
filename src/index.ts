@@ -142,7 +142,7 @@ function trackedAction(
 
   const successVersion = observable.box(0);
 
-  const actionWrapper: any = function(this: any, ...args: any[]) {
+  const actionWrapper: any = function (this: any, ...args: any[]) {
     runInAction(() => {
       fnState.pending = true;
       fnState.success = false;
@@ -170,19 +170,23 @@ function trackedAction(
 
         return Promise.resolve(response);
       },
-      err => {
+      (err) => {
         runInAction(() => {
           fnState.response = undefined;
           fnState.pending = false;
           fnState.error = err;
         });
 
-        const isLocalHost = /^localhost(:\d+)?/.test(window?.location?.host);
+        const isLocalHost = /^localhost(:\d+)?/.test(
+          globalThis?.location?.host ?? ''
+        );
+
         if (isLocalHost) {
           console.error(`Mobx async got an error:`, err);
+          return Promise.resolve(null);
+        } else {
+          return Promise.reject(err);
         }
-
-        return isLocalHost ? Promise.resolve(null) : Promise.reject(err);
       }
     );
   };
@@ -222,7 +226,7 @@ function trackedAction(
 
     return {
       configurable: true,
-      get: function(this: any) {
+      get: function (this: any) {
         if (firstRun) {
           fn = fn.bind(this);
           firstRun = false;
