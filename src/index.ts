@@ -10,6 +10,7 @@ import {
 } from 'mobx';
 import { fromPromise } from 'mobx-utils';
 import { IIsObservableObject } from 'mobx/dist/internal';
+import { useEffect, useState } from 'react';
 
 type IFunction = (...args: any[]) => void;
 
@@ -55,7 +56,7 @@ const toPromise = <T>(
     ? Promise.resolve((v as any).get())
     : Promise.resolve();
 
-export const isPending = (v: AsyncItem): boolean => {
+const isPending = (v: AsyncItem): boolean => {
   validateTrackedAction(v);
 
   if ((v as TrackedAction)?.trackedAction) {
@@ -71,7 +72,7 @@ export const isPending = (v: AsyncItem): boolean => {
   });
 };
 
-export const getError = (v: AsyncItem): Error | undefined => {
+const getError = (v: AsyncItem): Error | undefined => {
   validateTrackedAction(v);
 
   if ((v as TrackedAction)?.trackedAction) {
@@ -87,7 +88,7 @@ export const getError = (v: AsyncItem): Error | undefined => {
   });
 };
 
-export const succeeded = (action: TrackedAction | IFunction) => {
+const succeeded = (action: TrackedAction | IFunction) => {
   validateTrackedAction(action);
 
   return (action as TrackedAction)?.success;
@@ -103,22 +104,20 @@ const getValue = <T>(v: IGettable<Promise<T>> | Promise<T>): T | undefined => {
   });
 };
 
-export { getValue };
-
-export const resetter = (action: TrackedAction | IFunction): (() => void) => {
+const resetter = (action: TrackedAction | IFunction): (() => void) => {
   validateTrackedAction(action);
 
   return (action as TrackedAction)?.reset || (() => {});
 };
 
-export function dependsOn(...dependencies: AsyncItem[]) {
+const dependsOn = (...dependencies: AsyncItem[]) => {
   void dependencies.map((it: any) => {
     if (it?.constructor?.name === 'ObservableValue') return it?.get?.();
     if (it?.constructor?.name === 'ComputedValue') return it?.get?.();
     if (it?.trackedAction) return void it?.successVersion?.get();
     return undefined;
   });
-}
+};
 
 function trackedAction<T extends TrackedAction>(actionBody: T): T;
 function trackedAction(
@@ -243,4 +242,41 @@ function trackedAction(
   }
 }
 
-export { trackedAction };
+const useAwaited = <T extends any>(
+  promise: Promise<T>,
+  onFulfill?: (result?: T, _err?: Error) => void
+) => {
+  const rawResult = getValue(promise);
+  const error = getError(promise);
+  const loading = isPending(promise);
+
+  const [memoResult, setMemoResult] = useState(rawResult);
+
+  useEffect(() => {
+    if (loading) return;
+
+    if (!error) {
+      setMemoResult(rawResult);
+    }
+
+    onFulfill?.(rawResult, error);
+  }, [rawResult, loading, error]);
+
+  return {
+    loading,
+    error,
+    rawResult,
+    result: memoResult,
+  };
+};
+
+export {
+  trackedAction,
+  dependsOn,
+  resetter,
+  getValue,
+  getError,
+  succeeded,
+  isPending,
+  useAwaited,
+};
