@@ -222,7 +222,7 @@ function trackedAction(
 
 const useAwaited = <T extends any>(
   promise: Promise<T>,
-  { onFulfill }: { onFulfill?: (result?: T, _err?: Error) => void }
+  options?: { onFulfill?: (result?: T, _err?: Error) => void }
 ) => {
   const rawResult = getValue(promise)
   const error = getError(promise)
@@ -237,7 +237,7 @@ const useAwaited = <T extends any>(
       setMemoResult(rawResult)
     }
 
-    onFulfill?.(rawResult, error)
+    options?.onFulfill?.(rawResult, error)
   }, [rawResult, loading, error])
 
   return {
