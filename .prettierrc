@@ -8,7 +8,7 @@
   "singleQuote": true,
   "arrowParens": "always",
   "endOfLine": "lf",
-  "printWidth": 130,
+  "printWidth": 90,
   "htmlWhitespaceSensitivity": "ignore",
   "jsxSingleQuote": false
 }
