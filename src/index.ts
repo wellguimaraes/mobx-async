@@ -74,13 +74,13 @@ const succeeded = (action: TrackedAction | IFunction) => {
   return (action as TrackedAction)?.success
 }
 
-const getValue = <T>(v: IGettable<Promise<T>> | Promise<T>): T | undefined => {
-  const value = toPromise(v)
+const getValue = <T>(value: IGettable<Promise<T>> | Promise<T>, defaultValue?: T): T | undefined => {
+  const pValue = toPromise(value)
 
-  return fromPromise(value).case({
+  return fromPromise(pValue).case({
     fulfilled: (v: any) => v,
-    pending: () => undefined,
-    rejected: () => undefined
+    pending: () => defaultValue,
+    rejected: () => defaultValue
   })
 }
 
@@ -222,9 +222,9 @@ function trackedAction(
 
 const useAwaited = <T extends any>(
   promise: Promise<T>,
-  options?: { onFulfill?: (result?: T, _err?: Error) => void }
+  options?: { onFulfill?: (result?: T, _err?: Error) => void, defaultValue?: T }
 ) => {
-  const rawResult = getValue(promise)
+  const rawResult = getValue(promise, options?.defaultValue)
   const error = getError(promise)
   const loading = isPending(promise)
 
