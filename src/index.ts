@@ -74,7 +74,10 @@ const succeeded = (action: TrackedAction | IFunction) => {
   return (action as TrackedAction)?.success
 }
 
-const getValue = <T>(value: IGettable<Promise<T>> | Promise<T>, defaultValue?: T): T | undefined => {
+const getValue = <T>(
+  value: IGettable<Promise<T>> | Promise<T>,
+  defaultValue?: T
+): typeof defaultValue extends undefined ? T | undefined : T => {
   const pValue = toPromise(value)
 
   return fromPromise(pValue).case({
@@ -222,7 +225,7 @@ function trackedAction(
 
 const useAwaited = <T extends any>(
   promise: Promise<T>,
-  options?: { onFulfill?: (result?: T, _err?: Error) => void, defaultValue?: T }
+  options?: { onFulfill?: (result?: T, _err?: Error) => void; defaultValue?: T }
 ) => {
   const rawResult = getValue(promise, options?.defaultValue)
   const error = getError(promise)
